@@ -1,0 +1,40 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+* {
+  font-family: "Roboto", sans-serif;
+}
+
+body {
+  background: #edf6f9;
+}
+
+.bar {
+  background: #ffddd2;
+  width: 20em;
+  height: 2em;
+  margin: 1em;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+}
+
+.bar label {
+	z-index: 10;
+}
+
+.bar .bar-inner {
+	z-index: 5;
+
+  background: #e29578;
+  height: 100%;
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+	transition: width 0.1s;
+}

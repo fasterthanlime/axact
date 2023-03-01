@@ -7,7 +7,10 @@ function App(props) {
   return html`
     <div>
       ${props.cpus.map((cpu) => {
-        return html` <div>${cpu.toFixed(2)}% usage</div> `;
+        return html`<div class="bar">
+          <div class="bar-inner" style="width: ${cpu}%"></div>
+          <label>${cpu.toFixed(2)}%</label>
+        </div>`;
       })}
     </div>
   `;
@@ -15,7 +18,7 @@ function App(props) {
 
 let i = 0;
 
-setInterval(async () => {
+let update = async () => {
   let response = await fetch("/api/cpus");
   if (response.status !== 200) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -23,4 +26,7 @@ setInterval(async () => {
 
   let json = await response.json();
   render(html`<${App} cpus=${json}></${App}>`, document.body);
-}, 1000);
+};
+
+update();
+setInterval(update, 200);

@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use axum::{
     extract::{
         ws::{Message, WebSocket},
@@ -8,21 +6,25 @@ use axum::{
     http::Response,
     response::{Html, IntoResponse},
     routing::get,
-    Json, Router, Server,
+    Router, Server,
 };
 use sysinfo::{CpuExt, System, SystemExt};
+use tokio::sync::broadcast;
+
+type Snapshot = Vec<f32>;
 
 #[tokio::main]
 async fn main() {
+    let (tx, _) = broadcast::channel::<Snapshot>(1);
+
     tracing_subscriber::fmt::init();
 
-    let app_state = AppState::default();
+    let app_state = AppState { tx: tx.clone() };
 
     let router = Router::new()
         .route("/", get(root_get))
         .route("/index.mjs", get(indexmjs_get))
         .route("/index.css", get(indexcss_get))
-        .route("/api/cpus", get(api_cpus_get))
         .route("/realtime/cpus", get(realtime_cpus_get))
         .with_state(app_state.clone());
 
@@ -32,12 +34,7 @@ async fn main() {
         loop {
             sys.refresh_cpu();
             let v: Vec<_> = sys.cpus().iter().map(|cpu| cpu.cpu_usage()).collect();
-
-            {
-                let mut cpus = app_state.cpus.lock().unwrap();
-                *cpus = v;
-            }
-
+            tx.send(v).unwrap();
             std::thread::sleep(System::MINIMUM_CPU_UPDATE_INTERVAL);
         }
     });
@@ -49,9 +46,9 @@ async fn main() {
     server.await.unwrap();
 }
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
 struct AppState {
-    cpus: Arc<Mutex<Vec<f32>>>,
+    tx: broadcast::Sender<Snapshot>,
 }
 
 #[axum::debug_handler]
@@ -82,16 +79,6 @@ async fn indexcss_get() -> impl IntoResponse {
 }
 
 #[axum::debug_handler]
-async fn api_cpus_get(State(state): State<AppState>) -> impl IntoResponse {
-    let lock_start = std::time::Instant::now();
-    let v = state.cpus.lock().unwrap().clone();
-    let lock_elapsed = lock_start.elapsed().as_millis();
-    println!("Lock time: {}ms", lock_elapsed);
-
-    Json(v)
-}
-
-#[axum::debug_handler]
 async fn realtime_cpus_get(
     ws: WebSocketUpgrade,
     State(state): State<AppState>,
@@ -100,9 +87,11 @@ async fn realtime_cpus_get(
 }
 
 async fn realtime_cpus_stream(app_state: AppState, mut ws: WebSocket) {
-    loop {
-        let payload = serde_json::to_string(&*app_state.cpus.lock().unwrap()).unwrap();
-        ws.send(Message::Text(payload)).await.unwrap();
-        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    let mut rx = app_state.tx.subscribe();
+
+    while let Ok(msg) = rx.recv().await {
+        ws.send(Message::Text(serde_json::to_string(&msg).unwrap()))
+            .await
+            .unwrap();
     }
 }

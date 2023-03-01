@@ -7,6 +7,7 @@ use sysinfo::{CpuExt, System, SystemExt};
 async fn main() {
     let router = Router::new()
         .route("/", get(root_get))
+        .route("/api/cpus", get(cpus_get))
         .with_state(AppState {
             sys: Arc::new(Mutex::new(System::new())),
         });
@@ -23,7 +24,11 @@ struct AppState {
     sys: Arc<Mutex<System>>,
 }
 
-async fn root_get(State(state): State<AppState>) -> String {
+async fn root_get() -> &'static str {
+    "Hello"
+}
+
+async fn cpus_get(State(state): State<AppState>) -> String {
     use std::fmt::Write;
 
     let mut s = String::new();

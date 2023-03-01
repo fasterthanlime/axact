@@ -5,14 +5,16 @@
 }
 
 body {
-  background: #edf6f9;
+  background: #0f0f0f;
 }
 
 .bar {
-  background: #ffddd2;
+  background: #264653;
+  color: white;
+
   width: 20em;
   height: 2em;
-  margin: 1em;
+  margin: .5em;
 
   display: flex;
   align-items: center;
@@ -28,13 +30,17 @@ body {
 .bar .bar-inner {
 	z-index: 5;
 
-  background: #e29578;
   height: 100%;
 
+  background: #2A9D8F;
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
 
-	transition: width 0.1s;
+	transition: width 0.2s;
+}
+
+.bar, .bar-inner {
+  border-radius: 4px;
 }

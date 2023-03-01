@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use axum::{extract::State, routing::get, Router, Server};
+use axum::{extract::State, response::IntoResponse, routing::get, Json, Router, Server};
 use sysinfo::{CpuExt, System, SystemExt};
 
 #[tokio::main]
@@ -28,20 +28,12 @@ async fn root_get() -> &'static str {
     "Hello"
 }
 
-async fn cpus_get(State(state): State<AppState>) -> String {
-    use std::fmt::Write;
-
-    let mut s = String::new();
-
+#[axum::debug_handler]
+async fn cpus_get(State(state): State<AppState>) -> impl IntoResponse {
     let mut sys = state.sys.lock().unwrap();
-    sys.refresh_cpu(); // Refreshing CPU information.
+    // FIXME: this blocks, yes I feel bad. later.
+    sys.refresh_cpu();
 
-    for (i, cpu) in sys.cpus().iter().enumerate() {
-        let i = i + 1;
-
-        let usage = cpu.cpu_usage();
-        writeln!(&mut s, "CPU {i} {usage}%").unwrap();
-    }
-
-    s
+    let v: Vec<_> = sys.cpus().iter().map(|cpu| cpu.cpu_usage()).collect();
+    Json(v)
 }

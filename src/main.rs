@@ -34,7 +34,7 @@ async fn main() {
         loop {
             sys.refresh_cpu();
             let v: Vec<_> = sys.cpus().iter().map(|cpu| cpu.cpu_usage()).collect();
-            tx.send(v).unwrap();
+            let _ = tx.send(v);
             std::thread::sleep(System::MINIMUM_CPU_UPDATE_INTERVAL);
         }
     });

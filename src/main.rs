@@ -3,13 +3,13 @@ use axum::{
         ws::{Message, WebSocket},
         State, WebSocketUpgrade,
     },
-    http::Response,
     response::{Html, IntoResponse},
     routing::get,
     Router, Server,
 };
 use sysinfo::{CpuExt, System, SystemExt};
 use tokio::sync::broadcast;
+use tower_http::services::{ServeDir, ServeFile};
 
 type Snapshot = Vec<f32>;
 
@@ -21,10 +21,12 @@ async fn main() {
 
     let app_state = AppState { tx: tx.clone() };
 
+    let serve_dir =
+        ServeDir::new("dist/assets").not_found_service(ServeFile::new("dist/index.html"));
+
     let router = Router::new()
         .route("/", get(root_get))
-        .route("/index.mjs", get(indexmjs_get))
-        .route("/index.css", get(indexcss_get))
+        .nest_service("/assets", serve_dir)
         .route("/realtime/cpus", get(realtime_cpus_get))
         .with_state(app_state.clone());
 
@@ -53,29 +55,9 @@ struct AppState {
 
 #[axum::debug_handler]
 async fn root_get() -> impl IntoResponse {
-    let markup = tokio::fs::read_to_string("src/index.html").await.unwrap();
+    let markup = tokio::fs::read_to_string("dist/index.html").await.unwrap();
 
     Html(markup)
-}
-
-#[axum::debug_handler]
-async fn indexmjs_get() -> impl IntoResponse {
-    let markup = tokio::fs::read_to_string("src/index.mjs").await.unwrap();
-
-    Response::builder()
-        .header("content-type", "application/javascript;charset=utf-8")
-        .body(markup)
-        .unwrap()
-}
-
-#[axum::debug_handler]
-async fn indexcss_get() -> impl IntoResponse {
-    let markup = tokio::fs::read_to_string("src/index.css").await.unwrap();
-
-    Response::builder()
-        .header("content-type", "text/css;charset=utf-8")
-        .body(markup)
-        .unwrap()
 }
 
 #[axum::debug_handler]

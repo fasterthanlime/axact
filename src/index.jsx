@@ -76,8 +76,7 @@ function CPUBar({ cpu }) {
         class="bar-inner"
         style={{ width: cpu.compute((cpu) => `${cpu}%`) }}
       ></div>
-      {/* TODO: wait .toFixed is undefined fix */}
-      <span>{cpu}%</span>
+      <span>{cpu.toFixed(2)}%</span>
     </div>
   );
 }

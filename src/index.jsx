@@ -26,14 +26,11 @@ function createAsyncWSStream(defaultValue, ws, fetcher) {
   return data;
 }
 
-const color = (a, b) => (n) =>
-  n < a ? "#264653" : n >= b ? "#532630" : "#aa964e";
-
 let lastPing = Date.now();
 
 function App() {
   const ws = new WebSocket(url);
-  const ping = createReactor("0ms");
+  const ping = createReactor(0);
   const cpus = createAsyncWSStream([], ws, (event) => {
     const current = Date.now();
     ping(current - lastPing);
@@ -45,8 +42,11 @@ function App() {
     <div>
       <div
         class="bar"
-        style={{
-          "background-color": ping.compute(color(200_000, 1_000_000)),
+        classList={{
+          "bar-orange": ping.compute(
+            (ping) => ping >= 200_000 && ping < 1_000_000
+          ),
+          "bar-red": ping.compute((ping) => ping >= 1_000_000),
         }}
       >
         Ping:{" "}

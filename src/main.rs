@@ -90,8 +90,8 @@ async fn realtime_cpus_stream(app_state: AppState, mut ws: WebSocket) {
     let mut rx = app_state.tx.subscribe();
 
     while let Ok(msg) = rx.recv().await {
-        ws.send(Message::Text(serde_json::to_string(&msg).unwrap()))
-            .await
-            .unwrap();
+        let _ = ws
+            .send(Message::Text(serde_json::to_string(&msg).unwrap()))
+            .await;
     }
 }

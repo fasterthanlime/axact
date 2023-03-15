@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 axum = { version = "0.6.9", features = ["macros", "ws"] }
 serde_json = "1.0.93"
-sysinfo = "0.28.1"
+sysinfo = "0.28.2"
 tokio = { version = "1.25.0", features = ["full"] }
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }

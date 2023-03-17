@@ -1,6 +1,7 @@
 # axact
 
-Just messing around with axum + preact
+A resource monitor in your browser, so you can view the state of a VM or
+some other remote host. Built with Rust & Preact, see the video:
 
 https://youtu.be/c_5Jy_AVDaM
 

@@ -6,9 +6,13 @@ https://youtu.be/c_5Jy_AVDaM
 
 ## Community forks
 
-- [x] Using yeap instead of preact and tower backend: <https://github.com/hanako-eo/axact>
-- [x] Visualizing 128 cores: <https://github.com/useafterfree/axact>
+  - Using yeap instead of preact and tower backend: <https://github.com/hanako-eo/axact>
+
+  - Visualizing 128 cores: <https://github.com/useafterfree/axact>
 <img width="1887" alt="223535789-4013dd26-4902-44a0-80a2-4c22f0201a62" src="https://user-images.githubusercontent.com/35079898/223571760-ff375188-44a8-46da-a16a-8ff8731bc5e1.png">
+
+  - Adding chat functionality: <https://github.com/shahzadnaeem/axact>
+<img width="1200" src="https://raw.githubusercontent.com/shahzadnaeem/axact/main/doc/WithChat.png">
 
 ## License
 
